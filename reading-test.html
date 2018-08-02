@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- jquery set-up -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- site specific styles
+    <link rel="stylesheet" href="/resources/style.css">
+    -->
+    <!-- my scripts -->
+    <script src="codeselect.js"></script>
+
+    <title>Reading Comprehension (proof of concept)</title>
+  </head>
+  <body>
+    <h1> Answer the questions on the right by highlighting text on the left. </h1>
+    <div class="selectgame">
+
+<p>You are given a <span class="sType">string</span> <span class="param1">S</span> and an <span class="aType">array <span class="param2">A</span> consisting of N strings</span>.</p>
+
+<p>The <span class="sType">string</span> <span class="param1">S</span> consists of alphabetical characters (a-z, A-Z) and underscores('_'). <span class="sRepresents">It represents <span class="sRepresents">a <em>template</em></span></span>.<p>
+
+<p>Each element A[K] consists only of alphabetical characters (a-z, A-Z). It represents <span class="aRepresents">a string which may or may not <em>match</em> the <span class="sRepresents">template string</span></span>.
+<span class="sRepresents">A string Q <em>matches</em> a given <span class="sRepresents">template <span class="sType">string</span></span> <span class="param1">S</span> if for each character C in Q, the character at the same index in <span class="param1">S</span> is either equal to C, or is an underscore.</p>
+
+<p>Write a function:
+<pre class="signature">  def solution(<span class="param1">S</span>, <span class="param2">A</span>)</pre>
+that, given a <span class="sType">string</span> <span class="param1">S</span> and an <span class="aType">array of strings</span> <span class="param2">A</span>, returns <span class="output">the number of elements of <span class="param2">A</span> that match <span class="sRepresents">the template <span class="sType">string</span></span> <span class="param1">S</span></span>.</p>
+
+<span class="example1">
+<p>For example, given a <span class="sType">string</span>:
+<pre>"b__t"</pre>
+And an <span class="aType">array of strings</span>:
+<pre>["boat", "bat", "boot", "bite"]</pre>
+The function should return 2, because <span class="sRepresents">the template</span> "b__t" matches both "boat" and "boot".
+</p>
+</span>
+
+<p>Assume that:
+  <ul>
+    <li>the length of <span class="param1">S</span> is within the range [0..2,000,000];</li>
+    <li>N is an integer within the range [1..100,000];</li>
+    <li>Each string in <span class="param2">A</span> has length within the range [0..2,000,000].</li>
+  </ul>
+</p>
+
+<p>Complexity:
+  <ul>
+    <li>expected worst-case time complexity is O(length(<span class="param1">S</span>)*N);</li>
+    <li>expected worst-case space complexity is O(1) (not counting the storage required for input arguments).</li>
+  </ul>
+</p>
+
+    </div>
+
+  </body>
+</html>
