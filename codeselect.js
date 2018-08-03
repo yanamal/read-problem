@@ -93,11 +93,12 @@ $( function() {
 
   // Immediately give up and use tables.
   // wrap selectgame element(s) in a table:
-  $('.selectgame').wrapInner('<table class="gametable"><tr class="trow"><td class="textcell" width="600px"></td></tr></table>')
+
+  $('.selectgame').wrapInner('<div class="ui two column equal height grid container"><div class="column textcell" style="overflow:scroll;"></div></div>')
                   // process each selectgame element and add appropriate html:
                   .each(function(){
     // add a table cell to contain the buttons:
-    $('.textcell', this).after('<td class="questioncell"></td>');
+    $('.textcell', this).after('<div class="column questioncell" style="overflow:scroll;"></div>');
     questioncell = $(".questioncell", this);
     // for each question class in the question sequence, set up the HTML and behavior for displaying the question:
     for(let qset of questionSequence) {
@@ -105,7 +106,7 @@ $( function() {
         let qtext = questions[qclass].question;
         let qanswer = questions[qclass].answer;
         let qselector = '.'+qclass;
-        questioncell.append('<div id="'+qclass+'_question" style="display: none;"><h2>'+qtext+'</h2></div>\
+        questioncell.append('<div id="'+qclass+'_question" class="ui medium header" style="display: none;">'+qtext+'</div>\
                              <div id="'+qclass+'_answer" style="display: none;">'+qanswer+'</div>');
 
         // For each element of this particular selector class inside the selectgame class, add the attributes that let it be selected in answer to the question:
@@ -161,6 +162,9 @@ document.addEventListener("selectionchange", function() {
   // if all questions in this set have been answered, then advance to next question set.
   if(! foundUnanswered) {
     nextQuestionSet();
+    $(".questioncell").each(function(i){
+      this.scrollTop = this.scrollHeight
+    });
   }
 });
 
