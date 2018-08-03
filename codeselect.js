@@ -102,11 +102,13 @@ $( function() {
     questioncell = $(".questioncell", this);
     // for each question class in the question sequence, set up the HTML and behavior for displaying the question:
     for(let qset of questionSequence) {
+      let qsetSegment = $('<div class="qseg ui segment" style="display: none;"></div>')
+      questioncell.append(qsetSegment)
       for(let qclass of qset) {
         let qtext = questions[qclass].question;
         let qanswer = questions[qclass].answer;
         let qselector = '.'+qclass;
-        questioncell.append('<div id="'+qclass+'_question" class="ui medium header" style="display: none;">'+qtext+'</div>\
+        qsetSegment.append('<div id="'+qclass+'_question" class="ui medium header" style="display: none;">'+qtext+'</div>\
                              <div id="'+qclass+'_answer" style="display: none;">'+qanswer+'</div>');
 
         // For each element of this particular selector class inside the selectgame class, add the attributes that let it be selected in answer to the question:
@@ -130,7 +132,7 @@ $( function() {
 // TODO: use timeout to make sure they've finished selecting before providing feedback.
 document.addEventListener("selectionchange", function() {
 
-  if(current_qset_i > questionSequence.length) {
+  if(current_qset_i >= questionSequence.length) {
     // all question sets completed.
     return;
   }
@@ -188,13 +190,18 @@ function nextQuestionSet() {
       current_qset_i++;
   }
 
-  // show next question
+  //stop highlighting previous question set(s)
+  $('.qseg.segment').removeClass('blue raised')
+  // show next question set,
   if(current_qset_i < questionSequence.length) {
     for(let q of questionSequence[current_qset_i]) {
       qid = q+'_question'
       $('#'+qid).css({
         display: 'block'
-      });
+      })
+        .parent().css({ // TODO: better/just once per set
+          display: 'block'
+        }).addClass('blue raised');
     }
   }
 }
