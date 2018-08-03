@@ -33,10 +33,24 @@ let questions = {
   },
   'aRepresents': {
     'question': 'What each element of A represent?',
-    'answer': 'A string which might match the template string',
+    'answer': 'A string which might "match" the template string',
     'ids': {}
   },
-  // TODO: what does match mean?
+  'matchMeaning': {
+    'question': 'What does <em>match</em> mean in the context of this problem?',
+    'answer': 'A template <em>matches</em> a string if all the letters in the template and string are the same; each "_" in the template can be any letter in the string',
+    'ids': {}
+  },
+  'sConstraints': {
+      'question': 'What types of characters can be in S?',
+      'answer': 'Letters and underscores',
+      'ids': {}
+  },
+  'aConstraints': {
+      'question': 'What types of characters can be in each element of A?',
+      'answer': 'Only letters',
+      'ids': {}
+  },
   // TODO: what can S and A[K] consist of?
   'output': {
     'question': 'What should our function output?',
@@ -51,9 +65,6 @@ let questions = {
 };
 
 /*
-Other questions:
-input constraints? (non-empty, at least one alphanumeric, alphanumeric and dashes)
-performance constraints?
 Check-understanding:
 Given this input, what should the function output?
 */
@@ -67,6 +78,8 @@ let questionSequence = [
   ['param1', 'param2'],
   ['sType', 'aType'],
   ['sRepresents', 'aRepresents'],
+  ['matchMeaning'],
+  ['sConstraints','aConstraints'],
   ['output'],
   ['example1']
 ];
