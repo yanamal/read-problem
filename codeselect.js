@@ -28,7 +28,7 @@ let questions = {
   },
   'sRepresents': {
     'question': 'What does S represent?',
-    'answer': 'A template string to match against other strings.',
+    'answer': 'A template string to "match" against other strings.',
     'ids': {}
   },
   'aRepresents': {
@@ -38,7 +38,7 @@ let questions = {
   },
   'matchMeaning': {
     'question': 'What does <em>match</em> mean in the context of this problem?',
-    'answer': 'A template <em>matches</em> a string if all the letters in the template and string are the same; each "_" in the template can be any letter in the string',
+    'answer': 'A template <em>matches</em> a string if each letter in the template is the same as the corresponding letter in the string; each "_" in the template can be any letter in the string',
     'ids': {}
   },
   'sConstraints': {
@@ -94,7 +94,7 @@ $( function() {
   // Immediately give up and use tables.
   // wrap selectgame element(s) in a table:
 
-  $('.selectgame').wrapInner('<div class="ui two column equal height grid container"><div class="column textcell" style="overflow:scroll;"></div></div>')
+  $('.selectgame').wrapInner('<div class="ui two column equal height grid container raised segment"><div class="column textcell" style="overflow:scroll;"></div></div>')
                   // process each selectgame element and add appropriate html:
                   .each(function(){
     // add a table cell to contain the buttons:
