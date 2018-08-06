@@ -1,6 +1,9 @@
 let current_qset_i = undefined; // index of currently-active question set. TODO: add/remove specific listeners to current questions instead?..
 let current_fup_i = undefined;  // same but for 'follow-up' question
 
+// TODO: optional and/or subsumed questions? (e.g. "non-empty" and "contains at least one alphanumeric character")
+
+
 // TODO: allow for using one span with several classes, which represents the correct answer to several questions?
 // starting point
 $( function() {
@@ -61,6 +64,9 @@ $( function() {
           $('.field,.submit', event.target).addClass('disabled');
           // Show next question, if any:
           nextFollowup()
+          $(".questioncell").each(function(i){
+            this.scrollTop = this.scrollHeight
+          });
         }
        })
     }
@@ -162,6 +168,9 @@ function nextQuestionSet() {
   }
   else { // No more text-selection questions - move on to follow up question
     nextFollowup()
+    $(".questioncell").each(function(i){
+      this.scrollTop = this.scrollHeight
+    });
   }
 }
 

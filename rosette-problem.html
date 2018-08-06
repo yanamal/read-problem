@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- jquery set-up -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!--Semantic UI -->
+    <link rel="stylesheet" type="text/css" href="third-party/semantic.min.css">
+    <script src="third-party/semantic.min.js"></script>
+    <!-- my scripts -->
+    <script>
+      // question data
+      let questions = {
+        'signature': {
+          'question': 'What is the signature of the function you have to write?',
+          'answer': '<pre>def solution(A)</pre>',
+          'ids': {} // ids of elements in the text that are relevant to this question (auto-populated from HTML)
+        },
+        'param1': {
+          'question': 'What is the input parameter?',
+          'answer': 'A',
+          'ids': {}
+        },
+        'aType': {
+          'question': 'What data type is A?',
+          'answer': 'array of integers',
+          'ids': {}
+        },
+        'aRepresents': {
+          'question': 'What the array A (as a whole) represent?',
+          'answer': 'One round of a game.',
+          'ids': {}
+        },
+        'akRepresents': {
+          'question': 'What each element A[K] of A represent?',
+          'answer': 'The number chosen by player K in this round of the game.',
+          'ids': {}
+        },
+        // TODO: questions about standing in a circle
+        'circle1': {
+          'question': 'Assuming K !=0 and K != N-1, which player is to the <b>left</b> of player K?',
+          'answer': 'player K-1',
+          'ids': {}
+        },
+        'circle2': {
+          'question': 'Assuming K !=0 and K != N-1, which player is to the <b>right</b> of player K?',
+          'answer': 'player K+1',
+          'ids': {}
+        },
+        'circle3': {
+          'question': 'If K == N-1, which player is to the <b>right</b> of player K?',
+          'answer': 'player 0',
+          'ids': {}
+        },
+        // TODO: questions about standing in a circle
+        'points1': {
+          'question': 'What are the two ways player K can score a point in the game?',
+          'answer': 'Choose a number that\'s <b>less than</b> the number chosen by the player to the <b>right</b>',
+          'ids': {}
+        },
+        'points2': {
+          'question': '',
+          'answer': 'Choose a number that\'s <b>greater than</b> the number chosen by the player to the <b>left</b>',
+          'ids': {}
+        },
+        'lose': {
+          'question': 'In what situation does a player lose all their points for the round?',
+          'answer': 'When they choose a number that\'s exactly the same as another player',
+          'ids': {}
+        },
+        'output': {
+          'question': 'What should our function output?',
+          'answer': 'The biggest score achieved by any player in the given round of the game',
+          'ids': {}
+        },
+        'example1': {
+          'question': 'What is the provided input/output example?',
+          'answer': 'A = [3, 3, 1, 2] <br/>expected output: 2',
+          'ids': {}
+        }
+      };
+
+      let questionSequence = [
+        ['signature'],
+        ['param1'],
+        ['aType'],
+        ['aRepresents'],
+        ['akRepresents'],
+        ['circle1', 'circle2', 'circle3'],
+        ['points1', 'points2'],
+        ['lose'],
+        ['output'],
+        ['example1']
+      ];
+
+
+      let followups = [
+        {
+          'question':'Given these game rules, what is the maximum possible score a player can achieve in a round?',
+          'answer':'2'
+        },
+        {
+          'question':'Given the input:<br/> A=[5, 5, 5]<br/> what should the output be?',
+          'answer':'0'
+        },
+        {
+          'question':'Given the input:<br/> A=[3,1,2]<br/> what should the output be?',
+          'answer':'2'
+        },
+        {
+          'question':'Given the input:<br/> A=[1,11,2,10]<br/> what should the output be?',
+          'answer':'1'
+        }
+        // TODO: normal/vanilla example with answer 1?..
+      ]
+    </script>
+    <script src="codeselect.js"></script>
+
+    <style>
+        html, body {
+            height: 100%;
+            background-color: #2185d0
+        }
+
+        .ui.grid {
+            height: 600px;
+
+            background-color: #ffffff
+        }
+    </style>
+
+    <title>Reading Comprehension: String Templates</title>
+  </head>
+  <body>
+    <div class="ui container">
+      <div class="ui inverted blue segment" align="center"><h1> Answer the questions on the right by highlighting text on the left. </h1></div>
+      <div class="selectgame">
+
+<p>A non-empty <span class="aType">array <span class="param1">A</span> consisting of N integers</span> is given.</p>
+
+<p>
+The <span class="aType">array</span> represents <span class="aRepresents">one round of a game played by N people</span>. The players stand in a circle, such that:
+  <ul>
+    <li><span class="circle1">player K-1</span> is to the left of player K, and <span class="circle2">player K+1</span> is to the right of player K for 0 < K < N-1</li>
+    <li><span class="circle3">player 0</span> is to the right of player N-1</li>
+  </ul>
+</p>
+
+<p>Each player chooses an integer between 0 and M in secret from the other players. Each element A[K] represents <span class="akRepresents">the number chosen by player K</span>. Once each player has chosen a number, all the numbers are revealed simultaneously. The game is then scored as follows for each player K:
+  <ul>
+    <li>If <span class="points1">player K's number is less than the number chosen by the player to the right</span>, player K gets a point.</li>
+    <li>If <span class="points2">player K's number is greater than the number chosen by the player to the left</span>, player K gets a point.</li>
+    <li>If <span class="lose">player K's number is exactly the same as any other player's number</span>, player K's points are reset and they get 0 points in that round.</li>
+  </ul>
+</p>
+<p>
+For example, given:
+<pre>
+  A[0] = 3
+  A[1] = 3
+  A[2] = 1
+  A[3] = 2
+</pre>
+Players 0 and 1 would get 0 points, because they both picked 3. Player 2 would 1 point, because they chose a number that's less than the one chosen by player 3. Player 3 would get 2 points, because they chose a number that's both less than the one chosen by player 0, and greater than the one chosen by player 2.
+</p>
+
+<p>
+Write a function:
+<pre class="signature">
+  def solution(<span class="param1">A</span>)
+</pre>
+that, given a non-empty <span class="aType">array <span class="param1">A</span>  of N integers</span>, returns <span class="output">the biggest score achieved by any player in that round of the game</span>.
+</p>
+
+<span class="example1">
+<p>
+For example, given:
+<pre>
+  A[0] = 3
+  A[1] = 3
+  A[2] = 1
+  A[3] = 2
+</pre>
+the function should return 2, since player 3 achieved a score of 2, as explained above.
+</p>
+</span>
+
+<br/>
+<p>
+Assume that:
+  <ul>
+    <li>N is an integer within the range [1..100,000];</li>
+    <li>M is an integer within the range [1..100,000].</li>
+  </ul>
+</p>
+
+<p>
+Complexity:
+  <ul>
+    <li>expected worst-case time complexity is O(N);</li>
+    <li>expected worst-case space complexity is O(N) (not counting the storage required for input arguments).</li>
+  </ul>
+</p>
+      </div>
+    </div>
+  </body>
+</html>
