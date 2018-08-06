@@ -84,14 +84,22 @@ let questionSequence = [
   ['example1']
 ];
 
+
+let followups = [
+  {
+    'question':'Given the input:<br/> S="an_"<br/> A=["an", "ant", "anti", "any"]<br/> what should the output be?',
+    'answer':'2'
+  }
+]
+
+
 let current_qset_i = undefined; // index of currently-active question set. TODO: add/remove specific listeners to current questions instead?..
+let current_fup_i = undefined;  // same but for 'follow-up' question
 
 // TODO: allow for using one span with several classes, which represents the correct answer to several questions?
 // starting point
 $( function() {
   // Things in here will execute after the page loads:
-
-  // Immediately give up and use tables.
   // wrap selectgame element(s) in a table:
 
   $('.selectgame').wrapInner('<div class="ui two column equal height grid container raised segment"><div class="column textcell" style="overflow:scroll;"></div></div>')
@@ -122,6 +130,36 @@ $( function() {
         });
       }
     }
+    for (let i=0; i<followups.length; i++) {
+      let fid = 'followup_'+i;
+      let fup = followups[i];
+      let fSegment = $('<div class="qseg ui form segment" id="'+fid+'" style="display: none;"></div>');
+      questioncell.append(fSegment);
+      fSegment.append('<div>'+fup.question+'</div>');
+      fSegment.append('<div class="field"><input type="text" name="answer" placeholder="answer"></div>\
+                       <div class="ui primary submit button">Submit</div>\
+                       <div class="ui error message"></div>');
+      $('#'+fid).form({
+        fields: {
+           answer: {
+              identifier: 'answer',
+              rules: [
+                {
+                  type   : 'is['+fup.answer+']',
+                  prompt : 'That\'s not right, try again!'
+                }
+              ]
+            }
+        },
+        onSuccess: function(event, fields) {
+          // Disable this question:
+          $('.field,.submit', event.target).addClass('disabled');
+          // Show next question, if any:
+          nextFollowup()
+        }
+       })
+    }
+
     nextQuestionSet()
   });
 });
@@ -204,6 +242,30 @@ function nextQuestionSet() {
         }).addClass('blue raised');
     }
   }
+  else { // No more text-selection questions - move on to follow up question
+    nextFollowup()
+  }
+}
+
+function nextFollowup() {
+  if( isNaN(current_fup_i) ) {
+      current_fup_i = 0;
+  }
+  else {
+      current_fup_i++;
+  }
+
+  //stop highlighting previous question set(s)
+  $('.qseg.segment').removeClass('blue raised')
+  if(current_fup_i < followups.length) {
+    let fid = 'followup_'+current_fup_i;
+
+    $('#'+fid).css({
+      display: 'block'
+    }).addClass('blue raised');
+
+  }
+  // TODO: else - congrats modal.
 }
 
 // TODO: return fraction of correct selected, fraction/length of selected that's incorrect.
