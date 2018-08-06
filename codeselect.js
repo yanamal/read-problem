@@ -162,6 +162,19 @@ $( function() {
 
     nextQuestionSet()
   });
+  // 'Congrats' Modal for when they've finished the questions:
+  $('.selectgame').append('\
+    <div class="ui modal" id="congrats">\
+      <div class="ui header inverted green">Congratulations!</div>\
+      <div class="content">\
+      You answered all the questions about this problem. You can go back to the previous page to try a differnet problem, or stay on this page to keep studying this one.\
+      </div>\
+      <div class="actions">\
+        <div class="ui green ok button">\
+          OK\
+        </div>\
+      </div>\
+    </div>')
 });
 
 
@@ -265,7 +278,10 @@ function nextFollowup() {
     }).addClass('blue raised');
 
   }
-  // TODO: else - congrats modal.
+  else {
+    // All done with questions and follow ups - show congrats modal.
+    $('#congrats').modal('show')
+  }
 }
 
 // TODO: return fraction of correct selected, fraction/length of selected that's incorrect.
