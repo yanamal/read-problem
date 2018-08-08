@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- jquery set-up -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!--Semantic UI -->
+    <link rel="stylesheet" type="text/css" href="third-party/semantic.min.css">
+    <script src="third-party/semantic.min.js"></script>
+    <!-- my scripts -->
+    <script>
+      // question data
+      let questions = {
+        'signature': {
+          'question': 'What is the signature of the function you have to write?',
+          'answer': '<pre>def solution(A, B)</pre>',
+          'ids': {} // ids of elements in the text that are relevant to this question (auto-populated from HTML)
+        },
+        'param1': {
+          'question': 'What are the input parameters?',
+          'answer': 'A',
+          'ids': {}
+        },
+        'param2': {
+          'question': '', // TODO: less hacky way of having question groups with just one question string. lightweight data structure in questionSequence?
+          'answer': 'B',
+          'ids': {}
+        },
+        'aType': {
+          'question': 'What data type is A?',
+          'answer': 'array of integers',
+          'ids': {}
+        },
+        'bType': {
+          'question': 'What data type is B?',
+          'answer': 'array of integers',
+          'ids': {}
+        },
+        'aRepresents': {
+          'question': 'What does the array A (as a whole) represent?',
+          'answer': 'The walls that will move through the playing field',
+          'ids': {}
+        },
+        'akRepresents': {
+          'question': 'What does each element A[K] of A represent?',
+          'answer': 'Where the hole is located in wall K',
+          'ids': {}
+        },
+        'bRepresents': {
+          'question': 'What does the array B (as a whole) represent?',
+          'answer': 'The robot\'s intended moves throughout the game',
+          'ids': {}
+        },
+        'bkRepresents': {
+          'question': 'What does each element B[K] of B represent?',
+          'answer': 'How much the robot moves by at turn K (relative to its location before the turn starts)',
+          'ids': {}
+        },
+        'bkMove': {
+          'question': 'How does the robot decide where move at turn K?',
+          'answer': 'At turn K, it moves by B[K] units.',
+          'ids': {}
+        },
+        'losewin': {
+          'question': 'At turn K, under what circumstances does the robot successfully stay in the game, and under what circumstances is it swept off?',
+          'answer': 'The robot stays on the field if its position exactly matches the hole in wall K. Otherwise, it is swept off.',
+          'ids': {}
+        },
+        'output': {
+          'question': 'What should our function output?',
+          'answer': 'The number of turns the robot will last in the given game; or -1 if it survives the whole game',
+          'ids': {}
+        },
+        'example1': { // TODO: separate question for expected output?
+          'question': 'What are the two provided input/output examples?',
+          'answer': 'A = [1, 0] <br/>B = [2, -1] <br/>expected output: 0',
+          'ids': {}
+        },
+        'example2': { // TODO: separate question for expected output?
+          'question': '',
+          'answer': 'A = [1, 2, 5, 2] <br/>B = [1, 1, 3, -3] <br/>expected output: -1',
+          'ids': {}
+        }
+      };
+
+
+      let questionSequence = [
+        ['signature'],
+        ['param1', 'param2'],
+        ['aType', 'bType'],
+        ['aRepresents', 'akRepresents'],
+        ['bRepresents', 'bkRepresents'],
+        ['bkMove'],
+        ['losewin'],
+        ['output'],
+        ['example1', 'example2']
+      ];
+
+
+      let followups = [
+        // TODO: if robot is at position x, and next move is y; where will he be next?
+        {
+          'question':'Suppose the robot is currently at position 5, and its next move is -1. What is its next position?',
+          'answer':'4'
+        },
+        {
+          'question':'Consider the input:<br/> A=[7, 2, 5]<br/> B=[7, -5, 2]<br/>What\'s the position of the robot after its 1st move?',
+          'answer':'7'
+        },
+        {
+          'question':'For the same input, what\'s the position of the robot after its 2nd move?',
+          'answer':'2'
+        },
+        {
+          'question':'For the same input, what\'s the position of the robot after its 3rd move?',
+          'answer':'4'
+        },
+        {
+          'question':'For the same input, what should the solution function output? (At which turn will the robot be swept off the field?)',
+          'answer':'2'
+        }
+      ]
+    </script>
+    <script src="codeselect.js"></script>
+
+    <style>
+        html, body {
+            height: 100%;
+            background-color: #2185d0
+        }
+
+        .ui.grid {
+            height: 600px;
+
+            background-color: #ffffff
+        }
+    </style>
+
+    <title>Reading Comprehension: Hole in the Wall</title>
+  </head>
+  <body>
+    <div class="ui container">
+      <div class="ui inverted blue segment" align="center"><h1> Answer the questions on the right by highlighting text on the left. </h1></div>
+      <div class="selectgame">
+
+<p>
+A robot is playing "Hole in the Wall": The robot is able to move back and forth along a linear playing field of length M. On each turn, a wall, also of length M, moves through the playing field. Each wall has a single robot-shaped cutout in it. <span class="losewin">The robot must align itself with the cutout in order to pass through the wall and remain on the playing field. If the robot fails to do so, it is swept off the playing area by the wall and the game is over.</span>
+</p>
+
+<p>
+You are given two <span class="bType"><span class="aType">arrays, <span class="param1">A</span>  and <span class="param2">B</span> , both consisting of N integers.</span></span> A represents <span class="aRepresents">the sequence of walls that will move through the playing field</span>, and B represents <span class="bRepresents">the robot's moves in the game.</span>
+</p>
+
+<p>
+A[K] is an integer in the range [0...M-1]; it represents <span class="akRepresents">the position of the hole in the wall which sweeps the playing field at turn K.</span>
+</p>
+
+<p>
+B[K] is an integer representing <span class="bkRepresents">the robot's movement at turn K</span>: The robot starts the game at position 0. <span class="bkMove">At turn K, the robot moves by B[K] units.</span> If B[K] > 0, the robot moves to the left. If B[K] < 0, the robot moves to the right.
+</p>
+
+<p>
+After the robot moves, the wall specified by A[K] moves through the playing field. <span class="losewin">If the robot's position is the same as the position of the hole in the wall, the robot remains on the field. Otherwise, it is swept off the field by the wall.</span>
+</p>
+
+<p>
+Write a function:
+
+<pre class="signature">  def solution(<span class="param1">A</span>, <span class="param2">B</span>)</pre>
+
+that, given <span class="bType"><span class="aType">non-empty arrays <span class="param1">A</span>  and <span class="param2">B</span> , both consisting of N integers</span></span>, returns <span class="output">an integer representing the turn on which the robot will be swept off the playing area. If the robot is never swept off, and instead successfully passes through each wall, the function should return -1.</span>
+</p>
+
+<p>
+For example, <span class="example1">given arrays <span class="param1">A</span>  and <span class="param2">B</span>  where:
+<pre>
+  A[0] = 1    B[0] = 2
+  A[1] = 2    B[1] = -1
+</pre>
+the function should return 0, because the robot will be swept away on the 0th turn:</span>
+The robot starts out at position 0, then moves 2 to the left to be at position 2. Wall 0 then sweeps through the space, with the hole at position 1. Since the robot is not at position 1, it will be swept away by wall 0.
+</p>
+
+<span class="example2">
+<p>
+Given arrays <span class="param1">A</span>  and <span class="param2">B</span>  where:
+<pre>
+  A[0] = 1    B[0] = 1
+  A[1] = 2    B[1] = 1
+  A[2] = 5    B[0] = 3
+  A[3] = 2    B[1] = -3
+</pre>
+the function should return -1, because the robot will successfully pass through all 4 walls.
+</p>
+</span>
+
+<p>
+Assume that:
+  <ul>
+    <li>N is an integer within the range [1..100,000];</li>
+    <li>M is an integer within the range [1..100,000];</li>
+    <li>
+    each element of array <span class="param1">A</span>  is an integer within the range [0..M-1];</li>
+    <li>
+    each element of array <span class="param2">B</span>  is an integer within the range [-M..M-1];</li>
+    <li>
+    each element of array <span class="param2">B</span>  is guaranteed to be a valid move which does not take the robot out of the range [0...M-1].</li>
+  </ul>
+</p>
+
+<p>
+Complexity:
+  <ul>
+    <li>expected worst-case time complexity is O(N);</li>
+    <li>expected worst-case space complexity is O(1) (not counting the storage required for input arguments).</li>
+
+  </ul>
+</p>
+
+      </div>
+    </div>
+  </body>
+</html>
