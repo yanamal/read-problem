@@ -10,11 +10,11 @@ $( function() {
   // Things in here will execute after the page loads:
   // wrap selectgame element(s) in a table:
 
-  $('.selectgame').wrapInner('<div class="ui two column equal height grid container raised segment"><div class="column textcell" style="overflow:scroll;"></div></div>')
+  $('.selectgame').wrapInner('<div class="ui two column equal height grid container raised segment"><div class="column textcell" style="overflow:scroll;height: inherit;"></div></div>')
                   // process each selectgame element and add appropriate html:
                   .each(function(){
     // add a table cell to contain the buttons:
-    $('.textcell', this).after('<div class="column questioncell" style="overflow:scroll;"></div>');
+    $('.textcell', this).after('<div class="column questioncell" style="overflow:scroll;height: inherit;"></div>');
     questioncell = $(".questioncell", this);
     // for each question class in the question sequence, set up the HTML and behavior for displaying the question:
     for(let qset of questionSequence) {
@@ -86,10 +86,26 @@ $( function() {
         </div>\
       </div>\
     </div>')
+    $('.selectgame').append('\
+    <div id="feedback" align="center">\
+      <div id="no_relevant" style="display: inline-flex;border: orangered;border-style: solid;color: orangered;padding: 5px;font-weight: bolder;visibility: hidden">\
+      No relevant text selected\
+      </div>\
+      <div id="not_enough_relevant"  style="display: inline-flex;border: yellow;border-style: solid;color: yellow;padding: 5px;font-weight: bolder;visibility: hidden">\
+      Not enough relevant text selected\
+      </div>\
+      <div id="too_much_irrelevant" style="display: inline-flex;border: orange;border-style: solid;color: orange;padding: 5px;font-weight: bolder;visibility: hidden">\
+      Too much irrelevant text selected\
+      </div>\
+    </div>')
 });
 
 
 // helper functions
+
+// should the feedback boxes show up on selection change?
+// (false when the selection is a "leftover" from previous correctly answered question)
+let should_give_feedback = true  
 
 // TODO: use timeout to make sure they've finished selecting before providing feedback.
 document.addEventListener("selectionchange", function() {
@@ -108,12 +124,16 @@ document.addEventListener("selectionchange", function() {
 
     // check whether the new selection answers this current question in the set
     for(let el_id in questions[q].ids) {
-      correctness = checkSelection(el_id);
+      [validSelectionLength, totalLength, correctLength, invalidSelectionLength] = checkSelection(el_id);
+      correctness = validSelectionLength / totalLength
       if(correctness > 0.8) {
         console.log('correct!');
         answer_el.style.display = 'block';
         answer_el.completed = true;
         highlight('#'+answer_id);
+        highlight('#'+el_id);
+        should_give_feedback = false // Pause feedback boxes until new selection starts
+        // getSelection().empty() // Too jarring
       }
     }
 
@@ -133,6 +153,101 @@ document.addEventListener("selectionchange", function() {
 });
 
 
+// Logic for showing feedback boxes
+let feedbackTimeout = null
+document.addEventListener("selectionchange", function() {
+
+  // clear timeout from any previous delayed-feedback events
+  if (feedbackTimeout) {
+    clearTimeout(feedbackTimeout);
+  }
+
+  // Empty selection - reset feedback immediately
+  if(getSelection().toString().length == 0) {
+    for(feedback_id of ['no_relevant', 'not_enough_relevant', 'too_much_irrelevant']){
+      $('#'+feedback_id).css('visibility', 'hidden')
+    }
+    return
+  }
+
+  // Feeedback flag is off - reset and don't give feedback
+  if(!should_give_feedback) {
+    for(feedback_id of ['no_relevant', 'not_enough_relevant', 'too_much_irrelevant']){
+      $('#'+feedback_id).css('visibility', 'hidden')
+    }
+    return
+  }
+
+  // wait 500 ms after the last selection change event
+  feedbackTimeout = setTimeout(function () {
+
+    if(current_qset_i >= questionSequence.length) {
+      // all question sets completed.
+      return;
+    }
+  
+    // for each current question, check whether the selection is 'close enough' to the answer.
+    max_valid_selection_fraction = 0
+    max_correctness = 0
+    for(let q of questionSequence[current_qset_i]) {
+      answer_id = q+'_answer';
+      answer_el = document.getElementById(answer_id)
+  
+      // check how well the new selection answers this current question in the set
+      for(let el_id in questions[q].ids) {
+        [validSelectionLength, totalLength, correctLength, invalidSelectionLength] = checkSelection(el_id);
+        valid_selection_fraction = validSelectionLength / correctLength
+        max_valid_selection_fraction = Math.max(max_valid_selection_fraction, valid_selection_fraction)
+
+        // How correct could this selection possibly be, given the already-invalid portion?
+        possible_correctness =  correctLength / (invalidSelectionLength+correctLength)
+        max_correctness =Math.max(max_correctness, possible_correctness)
+      }
+    }
+    if(max_valid_selection_fraction == 0){
+      // There is a selection, but not of any relevant text
+      $('#no_relevant').css('visibility', 'visible')
+
+      // Don't show more detailed hints
+      $('#not_enough_relevant').css('visibility', 'hidden')
+      $('#too_much_irrelevant').css('visibility', 'hidden')
+    }
+    else{
+      // At least some relevant text is selected
+      $('#no_relevant').css('visibility', 'hidden')
+
+      // valid selection is not big enough
+      if (max_valid_selection_fraction < 0.8) {
+        $('#not_enough_relevant').css('visibility', 'visible')
+      }
+
+      // invalid selection is too big
+      if (max_correctness < 0.8) {
+        $('#too_much_irrelevant').css('visibility', 'visible')
+      }
+    }
+
+    // valid selection is big enough
+    if (max_valid_selection_fraction >= 0.8)  {
+      $('#not_enough_relevant').css('visibility', 'hidden')
+    }
+
+    // invalid selection is not too big
+    if (max_correctness >= 0.8)  {
+      $('#too_much_irrelevant').css('visibility', 'hidden')
+    }
+
+  }, 500);
+
+})
+
+
+
+document.addEventListener("selectstart", function() {
+  should_give_feedback = true  // restart selection feedback
+})
+
+
 // momentarily highlights element in green, then fades to white. TODO: should probably fade to transparent?
 // TODO: take in element instead?
 function highlight(selector){
@@ -140,6 +255,12 @@ function highlight(selector){
       'background-color': '#aaffaa',
     });
     $(selector).animate({ backgroundColor: '#ffffff' }, 500);
+
+    // TODO: ::selection doesn't work (just in jquery?..)
+    $(selector+'::selection').css( {
+      'background-color': '#aaffaa',
+    });
+    $(selector+'::selection').animate({ backgroundColor: '#ffffff' }, 500);
 }
 
 function nextQuestionSet() {
@@ -198,6 +319,7 @@ function nextFollowup() {
   }
 }
 
+// Check whether a particular element id has been selected (without selecting too much extra stuff)
 // TODO: return fraction of correct selected, fraction/length of selected that's incorrect.
 function checkSelection(id){
   let correctNode = document.getElementById(id);
@@ -205,6 +327,10 @@ function checkSelection(id){
 
   // correctness fraction - 0 is no overlap, 1 is exact correct selection, in between is extra text selected and/or some of the correct text is not selected.
   let correctnessFraction = 0;
+  let validSelectionLength = 0;
+  let totalLength = getSelection().toString().length;
+  let invalidSelectionLength = totalLength;
+
   if( getSelection().containsNode(correctNode, true) ) {
     // some overlap between selection and correct node:
     // at least part of the correct selection was selected
@@ -241,12 +367,13 @@ function checkSelection(id){
       // Note: because I'm trimming the whitespace, I think whitespace "adjacent" to the selection doesn't count toward totalLength. Oh well.
     }
     // calculate total length of "relevant" text (selected OR part of the correct text):
-    let totalLength = getSelection().toString().length + unselectedStart + unselectedEnd;
+    totalLength = getSelection().toString().length + unselectedStart + unselectedEnd;
     //calculate total length of "valid" text (selected AND part of the correct text):
-    let validSelectionLength = correctLength - unselectedStart - unselectedEnd;
+    validSelectionLength = correctLength - unselectedStart - unselectedEnd;
+    invalidSelectionLength = getSelection().toString().length - validSelectionLength;
 
     correctnessFraction = validSelectionLength/totalLength;
   }
-  return correctnessFraction
+  return [validSelectionLength, totalLength, correctLength, invalidSelectionLength]
   //document.getElementById('result_'+id).textContent = correctnessFraction;
 }
